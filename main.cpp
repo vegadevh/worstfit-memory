@@ -7,7 +7,7 @@ struct node
 {
     int id;
     int data;
-    vector<int> arr;
+    int pos_other_list;
     node *next;
 };
 
@@ -63,7 +63,6 @@ int retro_DATA(node *lista)
 
     for (int i = 0; i < size(lista); i++)
     {
-        //cout << "AQUI ESTA EL ERROR " << aux->data << "\n";
         if (max < aux->data)
         {
             max = aux->data;
@@ -95,43 +94,30 @@ void asignacion(int max_data, int max_id, node *lista1, node *lista2)
 {
     node *aux2 = lista2;
 
-    //PROBANDING
     int tam = size(aux2);
     int tam_lista = size(lista1);
-    int count = 0;
     if (lista1)
-    //cout << "max data: " << max_data << " max_id: " << max_id << " procesos: " << lista1->id << " memoria: " << aux2->id << "\n";
-    //for (int i = 0; i < tam_lista; i++)
-    //while (count < tam_lista)
     {
         for (int j = 0; j < tam; j++)
         {
             if (max_id == aux2->id && max_data > lista1->data)
             {
-                //Necesidad de antigua en struct !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-                aux2->arr.push_back(lista1->id);
-                lista1->arr.push_back(1);
-                // if (lista2->arr.at(0) == lista1->id)
-                // {
-                //     /* code */
-                // }
+                lista1->pos_other_list = aux2->id;
                 aux2->data = aux2->data - lista1->data;
-                cout << "El proceso " << lista1->id << " se almaceno en la memoria " << aux2->id << ". El espacio en " << aux2->id << " es: " << aux2->data << "\n";
+                cout << "El proceso " << lista1->id << " se almaceno en la memoria " << aux2->id << ". El espacio en " << lista1->pos_other_list << " es: " << aux2->data << "\n";
                 max_data = retro_DATA(lista2);
                 max_id = retro_ID(max_id, lista2);
-                //cout << "Among " << max_data << "\n";
-                //cout << "Us " << max_id << "\n";
                 break;
             }
             if (max_id == aux2->id && max_data < lista1->data)
             {
                 cout << "El proceso " << lista1->id << " NO se almaceno en la memoria."
                      << "\n";
+                lista1->pos_other_list = 0;
             }
 
             aux2 = aux2->next;
         }
-        //count++;
         asignacion(max_data, max_id, lista1->next, lista2);
     }
 }
@@ -140,6 +126,7 @@ void pre_asignacion(node *lista1, node *lista2)
 {
     //Lista2 sera de memoria
     //Lista1 sera de procesos
+
     int max_data = 0;
     int max_id = 0;
     max_data = retro_DATA(lista2);
@@ -150,38 +137,25 @@ void pre_asignacion(node *lista1, node *lista2)
 
 void des_asignacion(int find, node *lista1, node *lista2)
 {
-    //Lista2 sera de memoria
-    //Lista1 sera de procesos
     node *aux2 = lista2;
-
-    //PROBANDING
+    int tam = size(aux2);
+    int tam_lista = size(lista1);
     if (lista1)
     {
-        if (aux2->arr.size() == 0)
+        for (int j = 0; j < tam; j++)
         {
-            des_asignacion(find, lista1, lista2->next);
-        }
-        else
-        {
-            for (int j = 0; j < aux2->arr.size(); j++)
+            if (aux2->id == lista1->pos_other_list)
             {
-                if (aux2->arr.at(j) == lista1->id)
+                if (lista1->id == find)
                 {
-                    cout << "El valor del arr.data de memoria en: " << j << " ERA: " << aux2->data << "\n";
-                    cout << "El valor del arr de memoria en: " << j << " ERA: " << aux2->arr.at(j) << "\n";
-                    cout << "El valor del arr de proceso en: " << 0 << " ERA: " << lista1->arr.at(0) << "\n";
                     aux2->data += lista1->data;
-                    cout << "El valor del arr.data de memoria en: " << j << " ERA: " << aux2->data << "\n";
-                    aux2->arr.at(j) = 0;
-                    cout << "El valor del arr de memoria en: " << j << " es: " << aux2->arr.at(j) << "\n";
-                    lista1->arr.at(0) = 0;
-                    cout << "El valor del arr de proceso en: " << 0 << " es: " << lista1->arr.at(0) << "\n";
+                    lista1->pos_other_list = 0;
                     break;
                 }
-                aux2 = aux2->next;
             }
-            des_asignacion(find, lista1->next, lista2);
+            aux2 = aux2->next;
         }
+        des_asignacion(find, lista1->next, lista2);
     }
 }
 
@@ -197,25 +171,34 @@ void pre_des_asignacion(node *lista1, node *lista2)
     des_asignacion(find, lista1, lista2);
 }
 
-void estados(node *memoria)
+void estados(node *proceso)
+{
+    node *aux = proceso;
+
+    for (int i = 0; i < size(proceso); i++)
+    {
+        if (aux->pos_other_list != 0)
+        {
+            cout << "El proceso " << aux->id << " esta en la memoria " << aux->pos_other_list << ".\n";
+        }
+        aux = aux->next;
+    }
+}
+
+void estados_memoria(node *memoria)
 {
     node *aux = memoria;
 
     for (int i = 0; i < size(memoria); i++)
     {
-        if (aux->arr.size() != 0)
-        {
-            for (int j = 0; j < aux->arr.size(); j++)
-            {
-                if (aux->arr.at(j) != 0)
-                {
-                    cout << "El proceso " << aux->arr.at(j) << " esta en la memoria " << aux->id << ".\n";
-                }
-            }
-        }
+        cout << "La memoria " << aux->id << " tiene una cantidad de " << aux->data << " disponible"
+             << ".\n";
         aux = aux->next;
     }
 }
+
+//Metdos de asignacion de memoria por compactacion.
+
 //Funciones
 void menu();
 
@@ -239,7 +222,8 @@ void menu()
         cout << "1. Proceso de asignacion de memoria. \n";
         cout << "2. Proceso de des-asignacion de memoria. \n";
         cout << "3. Ver estado de procesos. \n";
-        cout << "4. Salir \n";
+        cout << "4. Ver estado de memoria. \n";
+        cout << "5. Salir \n";
         cin >> option;
 
         switch (option)
@@ -277,11 +261,14 @@ void menu()
             pre_des_asignacion(procesos, bloque_memoria);
             break;
         case 3:
-            estados(bloque_memoria);
+            estados(procesos);
+            break;
+        case 4:
+            estados_memoria(bloque_memoria);
             break;
 
         default:
             break;
         }
-    } while (option != 4);
+    } while (option != 5);
 }
