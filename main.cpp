@@ -3,11 +3,20 @@
 
 using namespace std;
 
+struct node_
+{
+    int id;
+    int data;
+
+    node *next;
+};
+
 struct node
 {
     int id;
     int data;
     int pos_other_list;
+    int pos_compac;
     node *next;
 };
 
@@ -197,6 +206,30 @@ void estados_memoria(node *memoria)
     }
 }
 
+int fun_disponible(node *memoria, int tam, int disponibles)
+{
+    node *aux = memoria;
+    for (int i = 0; i < tam; i++)
+    {
+        disponibles += aux->data;
+        aux = aux->next;
+    }
+    return disponibles;
+}
+
+int fun_no_disponible(node *procesos, int tam, int no_disponible)
+{
+    for (int i = 0; i < tam; i++)
+    {
+        if (procesos->pos_other_list != 0)
+        {
+            no_disponible += procesos->data;
+        }
+        procesos = procesos->next;
+    }
+    return no_disponible;
+}
+
 //Metdos de asignacion de memoria por compactacion.
 
 //Funciones
@@ -205,6 +238,10 @@ void menu();
 //Variables globales
 node *procesos = NULL,
      *bloque_memoria = NULL;
+node_ *compresion = NULL;
+
+int disponibles = 0;
+int no_disponible = 0;
 
 int main(int argc, char const *argv[])
 {
@@ -216,6 +253,32 @@ void menu()
 {
     int option;
 
+    int cantidad_process, process_size,
+        cantidad_bloque_m, bloque_m_size;
+
+    cout << "Ingrese cantidad de procesos: ";
+    cin >> cantidad_process;
+    cout << "Ingrese cantidad de bloques de memoria: ";
+    cin >> cantidad_bloque_m;
+    cout << "########## PROCESOS ##########\n";
+    for (int i = 0; i < cantidad_process; i++)
+    {
+        cout << "Tamanio del proceso " << i + 1 << ": ";
+        cin >> process_size; //El tamaño del proceso
+        insertarFinal(&procesos, process_size, i + 1);
+    }
+    cout << "########## MEMORIA ##########\n";
+    for (int i = 0; i < cantidad_bloque_m; i++)
+    {
+        cout << "Tamanio del de la memoria " << i + 1 << ": ";
+        cin >> bloque_m_size; //El tamaño de memoria del bloque
+        insertarFinal(&bloque_memoria, bloque_m_size, i + 1);
+    }
+
+    mostrar_process(procesos);
+    mostrar_memory(bloque_memoria);
+    cout << "\n";
+
     do
     {
         cout << "\n";
@@ -223,38 +286,13 @@ void menu()
         cout << "2. Proceso de des-asignacion de memoria. \n";
         cout << "3. Ver estado de procesos. \n";
         cout << "4. Ver estado de memoria. \n";
-        cout << "5. Salir \n";
+        cout << "5. Realizar compresion. \n";
+        cout << "6. Salir \n";
         cin >> option;
 
         switch (option)
         {
         case 1:
-            int cantidad_process, process_size,
-                cantidad_bloque_m, bloque_m_size;
-
-            cout << "Ingrese cantidad de procesos: ";
-            cin >> cantidad_process;
-            cout << "Ingrese cantidad de bloques de memoria: ";
-            cin >> cantidad_bloque_m;
-            cout << "########## PROCESOS ##########\n";
-            for (int i = 0; i < cantidad_process; i++)
-            {
-                cout << "Tamanio del proceso " << i + 1 << ": ";
-                cin >> process_size; //El tamaño del proceso
-                insertarFinal(&procesos, process_size, i + 1);
-            }
-            cout << "########## MEMORIA ##########\n";
-            for (int i = 0; i < cantidad_bloque_m; i++)
-            {
-                cout << "Tamanio del de la memoria " << i + 1 << ": ";
-                cin >> bloque_m_size; //El tamaño de memoria del bloque
-                insertarFinal(&bloque_memoria, bloque_m_size, i + 1);
-            }
-
-            mostrar_process(procesos);
-            mostrar_memory(bloque_memoria);
-            cout << "\n";
-
             pre_asignacion(procesos, bloque_memoria);
             break;
         case 2:
@@ -266,9 +304,12 @@ void menu()
         case 4:
             estados_memoria(bloque_memoria);
             break;
-
-        default:
+        case 5:
+            disponibles = 0;
+            no_disponible = 0;
+            disponibles = fun_disponible(bloque_memoria, cantidad_bloque_m, disponibles);
+            no_disponible = fun_no_disponible(procesos, cantidad_process, no_disponible);
             break;
         }
-    } while (option != 5);
+    } while (option != 6);
 }
