@@ -1,8 +1,13 @@
+/**
+ * Nombre completo: Diego Edgardo Vega Herrera.
+ */
+
 #include <iostream>
 #include <vector>
 
 using namespace std;
 
+//Estructura base para la lista de memoria post-compactacion
 struct node2
 {
     int id;
@@ -11,11 +16,20 @@ struct node2
     node2 *next;
 };
 
+//Funcion que retorna el tamaño de la lista
 int size(node2 *lista)
 {
     return lista == NULL ? 0 : 1 + size(lista->next);
 }
 
+/**
+ * Funcion especificamente pensada para llenar la lista de memoria compactada
+ * 
+ * lista: Se refiere a la lista de memoria compactada que inicialmente apunta a NULL
+ * info: Se refiere al tamaño que tendra este espacio en memoria
+ * id: Se refiere al id del bloque, el de memoria
+ * proceso: Se refiere al id del proceso que contiene
+ */
 void insertarFinal_compac(node2 **lista, int info, int id, int proceso)
 {
     if (id != 0)
@@ -42,10 +56,14 @@ void insertarFinal_compac(node2 **lista, int info, int id, int proceso)
     }
 }
 
+/**
+ * Funcion que recibe como parametro la lista de memoria compactada e imprime su contenido
+ */
 void mostrar_compactacion(node2 *lista)
 {
     if (lista)
     {
+        //Si lista->prpoceso es igual a 0 significa que ese proceso no fue asiganado segun el algoritmo
         if (lista->proceso != 0)
         {
             cout << "En memoria " << lista->id << " esta el proceso " << lista->proceso << " con tamanio: " << lista->data << "\n";
@@ -58,6 +76,15 @@ void mostrar_compactacion(node2 *lista)
     }
 }
 
+/**
+ * Estructura base para listas de procesos y memoria
+ * 
+ * id: Se refiere al id del elemento en la lista
+ * data: Se refiere al tamaño que tiene este elemento en la lista
+ * pos_other_list: Se refiere a la posicion del elemento en la otra lista |
+ * si hablamos de una lista de memoria, esta variable contendra que proceso tiene almacenado y por el contrario almacenara en que memoria esta el proceso
+ * pos_compac: Posicion una vez compactada la lista | Especifico para memoria
+ */
 struct node
 {
     int id;
@@ -67,11 +94,19 @@ struct node
     node *next;
 };
 
+//Funcion que retorna el tamaño de la lista
 int size(node *lista)
 {
     return lista == NULL ? 0 : 1 + size(lista->next);
 }
 
+/**
+ * Funcion especificamente pensada para llenar la lista de procesos y memoria
+ * 
+ * lista: Se refiere a la lista de memoria compactada que inicialmente apunta a NULL
+ * info: Se refiere al tamaño que tendra este espacio en memoria
+ * id: Se refiere al id del bloque, el de memoria
+ */
 void insertarFinal(node **lista, int info, int id)
 {
     node *n = new node;
@@ -94,6 +129,7 @@ void insertarFinal(node **lista, int info, int id)
     }
 }
 
+//Funcion que imprime en consola el nombre del proceso y su tamaño
 void mostrar_process(node *lista)
 {
     if (lista)
@@ -103,6 +139,7 @@ void mostrar_process(node *lista)
     }
 }
 
+//Funcion que imprime en consola el nombre de la memoria y su tamaño
 void mostrar_memory(node *lista)
 {
     if (lista)
@@ -112,6 +149,7 @@ void mostrar_memory(node *lista)
     }
 }
 
+//Funcion especifica para encontrar la data/tamaño mayor de una memoria
 int retro_DATA(node *lista)
 {
     node *aux = lista;
@@ -128,6 +166,7 @@ int retro_DATA(node *lista)
     return max;
 }
 
+//Funcion especifica para encontrar la id mayor de una memoria
 int retro_ID(int max_id, node *lista)
 {
     node *aux = lista;
@@ -146,6 +185,14 @@ int retro_ID(int max_id, node *lista)
     return max;
 }
 
+/**
+ * Funcion que realiza el algoritmo de peor ajuste de memoria
+ * 
+ * max_data: La cantidad de memoria mayor de la lista de memorias
+ * max_id: Contiene el id de la memoria con mayor tamaño en la lista de memorias
+ * lista1: Se refiere a la lista de procesos
+ * lista2: Se refiere a la lista de memorias
+ */
 void asignacion(int max_data, int max_id, node *lista1, node *lista2)
 {
     node *aux2 = lista2;
@@ -178,11 +225,14 @@ void asignacion(int max_data, int max_id, node *lista1, node *lista2)
     }
 }
 
+/**
+ * Funcion de preparacion para el algoritmo de peor ajuste
+ * 
+ * lista1: Se refiere a la lista de procesos
+ * lista2: Se refiere a la lista de memorias
+ */
 void pre_asignacion(node *lista1, node *lista2)
 {
-    //Lista2 sera de memoria
-    //Lista1 sera de procesos
-
     int max_data = 0;
     int max_id = 0;
     max_data = retro_DATA(lista2);
@@ -191,6 +241,13 @@ void pre_asignacion(node *lista1, node *lista2)
     asignacion(max_data, max_id, lista1, lista2);
 }
 
+/**
+ * Funcion que realiza lo inverso a la funcion de aignacion
+ * 
+ * find: Se refiere al numero ingresado como nombre del proceso a des-asignar
+ * lista1: Se refiere a la lista de procesos
+ * lista2: Se refiere a la lista de memorias
+ */
 void des_asignacion(int find, node *lista1, node *lista2)
 {
     node *aux2 = lista2;
@@ -215,6 +272,12 @@ void des_asignacion(int find, node *lista1, node *lista2)
     }
 }
 
+/**
+ * Funcion de preparacion des-asignar un proceso
+ * 
+ * lista1: Se refiere a la lista de procesos
+ * lista2: Se refiere a la lista de memorias
+ */
 void pre_des_asignacion(node *lista1, node *lista2)
 {
     //Lista2 sera de memoria
@@ -227,6 +290,9 @@ void pre_des_asignacion(node *lista1, node *lista2)
     des_asignacion(find, lista1, lista2);
 }
 
+/**
+ * Funcion para mostrar el estado actual de los procesos | informa en que memoria esta asignado el proceso
+ */
 void estados(node *proceso)
 {
     node *aux = proceso;
@@ -241,6 +307,9 @@ void estados(node *proceso)
     }
 }
 
+/**
+ * Funcion para mostrar el estado actual de la memoria | informa en que cuanta memoria libre tiene cada bloque de memoria
+ */
 void estados_memoria(node *memoria)
 {
     node *aux = memoria;
@@ -253,6 +322,13 @@ void estados_memoria(node *memoria)
     }
 }
 
+/**
+ * Funcion para calcular el total me memoria disponible de toda la memoria
+ * 
+ * memoria: Se refiere a la lista de memoria
+ * tam: Se refiere a la cantidad de bloques de memoria que se tienen
+ * disponibles: Se refiere a la variable que retornara la funcion - contendra el total de memoria disponible
+ */
 int fun_disponible(node *memoria, int tam, int disponibles)
 {
     node *aux = memoria;
@@ -264,23 +340,25 @@ int fun_disponible(node *memoria, int tam, int disponibles)
     return disponibles;
 }
 
-int fun_no_disponible(node *procesos, int tam, int no_disponible)
-{
-    for (int i = 0; i < tam; i++)
-    {
-        if (procesos->pos_other_list != 0)
-        {
-            no_disponible += procesos->data;
-        }
-        procesos = procesos->next;
-    }
-    return no_disponible;
-}
-
-//Funciones
+//Funcion que maneja el flujo de opciones que podra seleccionar el usuario al correr el programa
 void menu();
 
-//Variables globales
+/**Variables globales
+ * 
+ * procesos: Es la estructura de lista simple para procesos
+ * bloque_memoria: Es la estructura de lista simple para la memoria
+ * 
+ * compresion: Es la estructura de lista simple para la memoria una vez compactada
+ * aux: Es la estructura de lista simple que se utiliza como auxiliar apuntando a la lista de procesos
+ * 
+ * disponibles: Contendra la cantidad total de memoria que se encunetra disponible
+ * no_disponible: Contiene la cantidad total de memoria que esta siendo utilizada por un proceso
+ * 
+ * data:
+ * nombre_memoria: Contiene los id de la memoria, siendo la forma en la que se nombran
+ * nombre_proceso: Contiene los id de los procesos, siendo la forma en la que se nombran
+ */
+
 node *procesos = NULL,
      *bloque_memoria = NULL;
 node2 *compresion = NULL;
@@ -293,6 +371,7 @@ int data;
 int nombre_memoria;
 int nombre_proceso;
 
+//main class
 int main(int argc, char const *argv[])
 {
     menu();
@@ -302,6 +381,14 @@ int main(int argc, char const *argv[])
 void menu()
 {
     int option;
+
+    /**
+     * cantidad_procesos: Cantidad de procesos que usara el usuatio
+     * process_size: tamaño del proceso
+     * 
+     * cantidad_bloque_m: Cantidad de bloques de memoria
+     * bloque_m_size: tamaño de la memoria
+    */
 
     int cantidad_process, process_size,
         cantidad_bloque_m, bloque_m_size;
