@@ -46,7 +46,14 @@ void mostrar_compactacion(node2 *lista)
 {
     if (lista)
     {
-        cout << "En memoria " << lista->id << " esta el proceso " << lista->proceso << " con tamanio: " << lista->data << "\n";
+        if (lista->proceso != 0)
+        {
+            cout << "En memoria " << lista->id << " esta el proceso " << lista->proceso << " con tamanio: " << lista->data << "\n";
+        }
+        else
+        {
+            cout << "En memoria " << lista->id << " esta libre con tamanio: " << lista->data << "\n";
+        }
         mostrar_compactacion(lista->next);
     }
 }
@@ -270,34 +277,6 @@ int fun_no_disponible(node *procesos, int tam, int no_disponible)
     return no_disponible;
 }
 
-//Metdos de asignacion de memoria por compactacion.
-
-// node2 compactar(node *proceso, node2 *compac)
-// {
-//     node *aux = proceso;
-//     node2 *incompac = compac;
-
-//     int nombre_proceso;
-//     int nombre_memoria;
-//     if (compac)
-//     {
-//         for (int i = 0; i < size(proceso); i++)
-//         {
-//             if (aux->pos_other_list != 0)
-//             {
-//                 nombre_proceso = aux->id;
-//                 nombre_memoria = aux->pos_other_list;
-
-//                 //void insertarFinal_compac(node2 **lista, int info, int id, int proceso)
-//                 insertarFinal_compac(&compac, aux->data, nombre_memoria, nombre_proceso);
-//                 //cout << "El proceso " << aux->id << " esta en la memoria " << aux->pos_other_list << ".\n";
-//             }
-//             aux = aux->next;
-//         }
-//         compactar(proceso, compac->next);
-//     }
-//     return *incompac;
-// }
 //Funciones
 void menu();
 
@@ -384,17 +363,17 @@ void menu()
             data = procesos->data;
             nombre_memoria = procesos->pos_other_list;
             nombre_proceso = procesos->id;
+            compresion = NULL;
             for (int i = 0; i < cantidad_process; i++)
             {
                 data = aux->data;
                 nombre_memoria = aux->pos_other_list;
                 nombre_proceso = aux->id;
-                cout << "DATA: " << data << "MEMORY: " << nombre_memoria << "PROCESO: " << nombre_proceso << "\n";
-                cout << "AUX "
-                     << "DATA: " << aux->data << "MEMORY: " << aux->pos_other_list << "PROCESO: " << aux->id << "\n";
+                cout << "\n";
                 insertarFinal_compac(&compresion, data, nombre_memoria, nombre_proceso);
                 aux = aux->next;
             }
+            insertarFinal_compac(&compresion, disponibles, size(bloque_memoria), 0);
             mostrar_compactacion(compresion);
             break;
         }
